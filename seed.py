@@ -2,11 +2,12 @@
 
 from sqlalchemy import func
 from model import User
-# from model import Rating
-# from model import Movie
+from model import Rating
+from model import Movie
 
 from model import connect_to_db, db
 from server import app
+from datetime import datetime
 
 
 def load_users():
@@ -42,17 +43,29 @@ def load_movies():
 
     for row in open("seed_data/u.item"):
         row = row.rstrip()
-        movie_id, title, released_at, imdb_url = row.split("|")
+        row = row.split("|")
 
-        title = title.split(" ")
-        title_date_removed = title[0:-1]
-        title_date_removed = " ".join(title_date_removed)
 
-        print(title_date_removed)
+        movie_id = row[0]
+        title = row[1]
+        released_at = row[2]
+        imdb_url = row[3]
+
+
+        print(movie_id)
+        print(title)
+        print(released_at)
+        print(imdb_url)
+
+        title = title[:-7]
+
+        date_str = released_at
+        format = "%d-%b-%Y"
+        date = datetime.strptime(date_str, format)
 
         movie = Movie(movie_id=movie_id,
-                      title=title_date_removed,
-                      released_at=released_at,
+                      title=title,
+                      released_at=date,
                       imdb_url=imdb_url) 
 
         db.session.add(movie)
@@ -62,6 +75,23 @@ def load_movies():
 def load_ratings():
     """Load ratings from u.data into database."""
 
+    Rating.query.delete()
+
+    # Read u.user file and insert data
+    for row in open("seed_data/u.data"):
+        row = row.rstrip()
+        rating_id, movie_id, user_id, score = row.split("|")
+
+        rating = Rating(rating_id=rating_id,
+                        movie_id=movie_id,
+                        user_id=user_id,
+                        score=score)
+
+        # We need to add to the session or it won't ever be stored
+        db.session.add(rating)
+
+    # Once we're done, we should commit our work
+    db.session.commit()
 
 def set_val_user_id():
     """Set value for the next user_id after seeding database"""
