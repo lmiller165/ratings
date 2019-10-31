@@ -31,7 +31,58 @@ def user_list():
 
     users = User.query.all()
     return render_template("user_list.html", users=users)
-    
+
+
+
+@app.route("/registration", methods=["GET"])
+def registration_view():
+    return render_template("registration_form.html")
+
+
+@app.route("/registration", methods=["POST"])
+def registration_process():
+    """Check if user is part of our database, if not, add them"""
+
+    #if email in users, redirect to log in page
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    if email == User.query.filter_by(email=email):
+        return redirect("/log_in")
+
+    #else add email and password to database 
+    else:
+        user = User(email=email, password=password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect("/users")
+
+
+@app.route("/login", methods=["GET"])
+def login():
+    """Show log in page"""
+    return render_template("log_in.html")
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    """Show log in page"""
+
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    if (email == User.query.filter_by(email=email)
+        and password == #writequery) 
+
+
+        email & password == password
+
+
+    return render_template("log_in.html")
+
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
